@@ -1,0 +1,36 @@
+client fw-hq {
+        ipaddr = 10.1.10.97
+        secret = kjhJHIU78uhio0
+        nas_type =other
+}
+
+client net-hq {
+        ipaddr = 10.1.2.0/24
+        secret = kd98d#r9dkp))-0
+        nas_type = cisco
+}
+
+client net-br1 {
+        ipaddr = 10.2.2.0/24
+        secret = kd98d#r9dkp))-0
+        nas_type = cisco
+}
+
+client net-br2 {
+        ipaddr = 10.3.2.0/24
+        secret = kd98d#r9dkp))-0
+        nas_type = cisco
+}
+
+client localhost {
+        ipaddr = 127.0.0.1
+        proto = *
+        secret = kd98d#r9dkp))-0
+        require_message_authenticator = no
+        nas_type = other
+        limit {
+                max_connections = 16
+                lifetime = 0
+                idle_timeout = 30
+        }
+}

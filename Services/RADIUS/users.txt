@@ -1,0 +1,11 @@
+DEFAULT Ldap-Group == "cn=netadmins,ou=group,dc=corp,dc=lab", Service-Type = Framed-User
+        Tunnel-Medium-Type = "IEEE-802",
+        Tunnel-Private-Group-ID = "60",
+        Tunnel-Type = VLAN
+
+DEFAULT Ldap-Group == "cn=secadmins,ou=group,dc=corp,dc=lab", NAS-Identifier = "HA", NAS-Port-Type = Virtual 
+        User-Service-Type = Login-User,
+        Fortinet-Group-Name = "secadmins"
+
+DEFAULT Ldap-Group == "cn=netadmins,ou=group,dc=corp,dc=lab"
+        Cisco-AVPair += "shell:priv-lvl=15"

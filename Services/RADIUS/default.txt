@@ -1,0 +1,118 @@
+listen {
+	#
+	type = auth
+	ipaddr = *
+	port = 0
+	limit {
+	      max_connections = 16
+
+	      lifetime = 0
+	      idle_timeout = 30
+	}
+}
+
+authorize {
+	filter_username
+	preprocess
+	chap
+	mschap
+	digest
+	eap {
+		ok = return
+	}
+	files
+	-sql
+	ldap
+	if ((ok || updated) && User-Password && !control:Auth-Type) {
+		update control {
+			&Auth-Type := ldap
+		}
+	}
+	expiration
+	logintime
+	pap
+	Autz-Type New-TLS-Connection {
+		  ok
+	}
+}
+
+authenticate {
+
+	Auth-Type PAP {
+		pap
+	}
+	Auth-Type CHAP {
+		chap
+	}
+	Auth-Type MS-CHAP {
+		mschap
+	}
+	mschap
+	digest
+	Auth-Type LDAP {
+		ldap
+	}
+	-eap
+}
+
+preacct {
+	preprocess
+	acct_unique
+	suffix
+	files
+}
+
+accounting {
+	detail
+	unix
+	-sql
+	exec
+}
+
+
+session {
+}
+
+
+post-auth {
+	if (session-state:User-Name && reply:User-Name && request:User-Name && (reply:User-Name == request:User-Name)) {
+		update reply {
+			&User-Name !* ANY
+		}
+	}
+	update {
+		&reply: += &session-state:
+	}
+	-sql
+	Post-Auth-Type REJECT {
+		# log failed authentications in SQL, too.
+		-sql
+		attr_filter.access_reject
+
+		# Insert EAP-Failure message if the request was
+		# rejected by policy instead of because of an
+		# authentication failure
+		-eap
+
+		#  Remove reply message if the response contains an EAP-Message
+		remove_reply_message_if_eap
+	}
+	Post-Auth-Type Challenge {
+	}
+	Post-Auth-Type Client-Lost {
+	}
+	if (EAP-Key-Name && &reply:EAP-Session-Id) {
+		update reply {
+			&EAP-Key-Name := &reply:EAP-Session-Id
+		}
+	}
+}
+
+pre-proxy {
+}
+
+post-proxy {
+
+	-eap
+}
+}
