@@ -1,0 +1,187 @@
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+service compress-config
+!
+hostname sw-br1-core-2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+logging discriminator EXCESS severity drops 6 msg-body drops EXCESSCOLL 
+logging buffered 8192
+logging console discriminator EXCESS
+enable secret 4 tnhtc92DXBhelxjYk8LWJrPV36S2i4ntXrpb4RFmfqY
+!
+username netadmin secret 4 tnhtc92DXBhelxjYk8LWJrPV36S2i4ntXrpb4RFmfqY
+!
+aaa new-model
+!
+!
+aaa authentication login default group radius local
+aaa authentication dot1x default group radius
+aaa authorization console
+aaa authorization exec default group radius local 
+aaa authorization network default group radius 
+!
+!
+!
+!
+!
+aaa session-id common
+clock timezone EET 2 0
+clock summer-time EET recurring last Sun Mar 3:00 last Sun Oct 4:00
+no ipv6 cef
+ipv6 multicast rpf use-bgp
+vtp mode transparent
+no ip routing
+no ip icmp rate-limit unreachable
+!
+no ip domain-lookup
+ip domain-name corp.lab
+ip name-server 10.1.10.40
+no ip cef
+!
+!
+ip dhcp snooping vlan 61,70-71,100
+no ip dhcp snooping information option
+ip dhcp snooping
+login block-for 120 attempts 3 within 60
+login quiet-mode access-class QUIET-NET-ACCESS
+login on-failure log
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+spanning-tree vlan 1-4094 priority 8192
+!
+!
+!
+!
+vlan internal allocation policy ascending
+!
+vlan 2
+ name NetMGMT
+!
+vlan 61
+ name Warehouse
+!
+vlan 70
+ name Printers
+!
+vlan 71
+ name Scanners
+!
+vlan 100
+ name Telephony
+!
+ip tcp synwait-time 5
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ description ### To sw-br1-core-1 ###
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ duplex auto
+!
+interface Ethernet0/1
+ shutdown
+ duplex auto
+!
+interface Ethernet0/2
+ shutdown
+ duplex auto
+!
+interface Ethernet0/3
+ description ### To fw-br1-2 ###
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ duplex auto
+ ip dhcp snooping trust
+!
+interface Ethernet1/0
+ description ### To sw-br1-acc-1 ###
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ duplex auto
+!
+interface Ethernet1/1
+ description ### To sw-br1-acc-2 ###
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ duplex auto
+!
+interface Ethernet1/2
+ shutdown
+ duplex auto
+!
+interface Ethernet1/3
+ shutdown
+ duplex auto
+!
+interface Vlan1
+ description ### Default VLAN ###
+ no ip address
+ no ip route-cache
+ shutdown
+!
+interface Vlan2
+ description ### Net management ###
+ ip address 10.2.2.3 255.255.255.0
+!
+ip default-gateway 10.2.2.1
+!
+no ip http server
+!
+!
+!
+ip access-list standard QUIET-NET-ACCESS
+ permit 10.1.50.2
+!
+ip access-list extended NET-ACCESS
+ permit ip 10.1.50.0 0.0.0.255 any
+!
+radius-server host 10.1.10.100 auth-port 1812 acct-port 1813 key 7 141C1652540069397D2C38256B5A4A46
+!
+!
+!
+control-plane
+!
+banner motd ^
+*************************************************************************
+* This system is for the use of authorized personel only.               *
+* Individuals using this computer system without authority, or in       *
+* excess of their authority, are subject to having all of their         *
+* activities on this system monitored and recorded by system            *
+* personnel.                                                            *
+*************************************************************************
+                             $(hostname)
+*************************************************************************
+^
+!
+!
+line con 0
+ exec-timeout 0 0
+ logging synchronous
+line aux 0
+ exec-timeout 0 0
+ logging synchronous
+line vty 0 4
+ access-class NET-ACCESS in
+ transport input ssh
+ transport output none
+!
+ntp server 10.1.2.1
+end
+
