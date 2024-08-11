@@ -1,0 +1,154 @@
+
+!
+! Last configuration change at 04:29:54 EST Mon Jul 15 2024
+!
+version 15.4
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname Inet-ISP-2
+!
+boot-start-marker
+boot-end-marker
+!
+aqm-register-fnf
+!
+!
+no aaa new-model
+clock timezone EST -5 0
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+no ip icmp rate-limit unreachable
+!
+!
+!
+!
+!
+!
+
+
+!
+!
+!
+!
+no ip domain lookup
+no ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+!
+redundancy
+!
+no cdp log mismatch duplex
+!
+ip tcp synwait-time 5
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ description ### To HQ ###
+ ip address 193.92.0.1 255.255.255.248
+!
+interface Ethernet0/1
+ description ### To Branch 1 ###
+ ip address 193.92.0.9 255.255.255.248
+!
+interface Ethernet0/2
+ description ### To Branch 2 ###
+ ip address 193.92.0.17 255.255.255.248
+!
+interface Ethernet0/3
+ no ip address
+ shutdown
+!
+interface Ethernet1/0
+ no ip address
+ shutdown
+!
+interface Ethernet1/1
+ no ip address
+ shutdown
+!
+interface Ethernet1/2
+ no ip address
+ shutdown
+!
+interface Ethernet1/3
+ description ### Inter ISP ###
+ ip address 100.100.100.2 255.255.255.252
+!
+router bgp 65502
+ bgp router-id 100.100.100.2
+ bgp log-neighbor-changes
+ timers bgp 5 15
+ neighbor 100.100.100.1 remote-as 65501
+ neighbor 193.92.0.2 remote-as 65000
+ !
+ address-family ipv4
+  network 193.92.0.0 mask 255.255.255.248
+  network 193.92.0.8 mask 255.255.255.248
+  network 193.92.0.16 mask 255.255.255.248
+  neighbor 100.100.100.1 activate
+  neighbor 100.100.100.1 soft-reconfiguration inbound
+  neighbor 193.92.0.2 activate
+  neighbor 193.92.0.2 soft-reconfiguration inbound
+  neighbor 193.92.0.2 prefix-list TO_CLIENT out
+  default-information originate
+ exit-address-family
+!
+ip forward-protocol nd
+!
+!
+no ip http server
+no ip http secure-server
+!
+!
+ip prefix-list TO_CLIENT seq 5 permit 193.92.0.0/16 ge 24
+ip prefix-list TO_CLIENT seq 15 permit 0.0.0.0/0
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line vty 0 4
+ login
+ transport input none
+!
+!
+end
