@@ -1,0 +1,195 @@
+version 15.2
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+service compress-config
+!
+hostname sw-br2-acc-2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+enable secret 5 $1$qbvV$83wVmk4NBHqOkH5mNJ..J1
+!
+username netadmin privilege 15 secret 4 tnhtc92DXBhelxjYk8LWJrPV36S2i4ntXrpb4RFmfqY
+aaa new-model
+!
+!
+aaa authentication login default group radius local
+aaa authentication dot1x default group radius
+aaa authorization console
+aaa authorization exec default group radius local 
+aaa authorization network default group radius 
+!
+!
+!
+!
+!
+!
+aaa session-id common
+clock timezone EET 2 0
+clock summer-time EET recurring last Sun Mar 3:00 last Sun Oct 4:00
+!
+!
+!
+!
+!
+vtp mode transparent
+no ip routing
+ip arp inspection vlan 2,61,70-71,100,300
+!
+!
+!
+ip dhcp snooping vlan 2,61,70-71,100,300
+no ip dhcp snooping information option
+ip dhcp snooping
+no ip domain-lookup
+ip domain-name corp.lab
+ip name-server 10.1.10.40
+no ip cef
+login block-for 120 attempts 3 within 60
+login quiet-mode access-class QUIET-NET-ACCESS
+login on-failure log
+no ipv6 cef
+
+!
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+!
+vlan 2
+ name NetMGMT
+!
+vlan 61   
+ name Warehouse
+!
+vlan 70
+ name Printers
+!
+vlan 71
+ name Scanners
+!
+vlan 100
+ name Telephony
+!
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!         
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ description ### To sw-br2-core-1 ###
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ ip arp inspection trust
+ negotiation auto
+ ip dhcp snooping trust
+!
+interface GigabitEthernet0/1
+ description ### To sw-br2-core-2 ###
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ ip arp inspection trust
+ negotiation auto
+ ip dhcp snooping trust
+!
+interface GigabitEthernet0/2
+ shutdown
+ negotiation auto
+!         
+interface GigabitEthernet0/3
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet1/0
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet1/1
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet1/2
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet1/3
+ shutdown
+ negotiation auto
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan2
+ description ### Net management ###
+ ip address 10.3.2.5 255.255.255.0
+!
+ip default-gateway 10.3.2.1
+ip forward-protocol nd
+!
+ip http server
+ip http secure-server
+!
+ip ssh server algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+ip ssh client algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+!
+!
+!
+!
+!
+ip access-list standard QUIET-NET-ACCESS
+ permit 10.1.50.2
+!
+ip access-list extended NET-ACCESS
+ permit ip 10.1.50.0 0.0.0.255 any
+!
+radius server radius
+ address ipv4 10.1.10.100 auth-port 1812 acct-port 1813
+ key 7 141C1652540069397D2C38256B5A4A46
+!
+!
+control-plane
+!
+banner motd ^
+*************************************************************************
+* This system is for the use of authorized personel only.               *
+* Individuals using this computer system without authority, or in       *
+* excess of their authority, are subject to having all of their         *
+* activities on this system monitored and recorded by system            *
+* personnel.                                                            *
+*************************************************************************
+                             $(hostname)
+*************************************************************************
+^
+!
+line con 0
+ exec-timeout 0 0
+ logging synchronous
+line aux 0
+ exec-timeout 0 0
+ logging synchronous
+line vty 0 4
+ access-class NET-ACCESS in
+ transport input ssh
+ transport output none
+!
+ntp server 10.1.2.1
+!
+end
+

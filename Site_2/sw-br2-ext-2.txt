@@ -1,0 +1,145 @@
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+service compress-config
+!
+hostname sw-br2-ext-2
+!
+boot-start-marker
+boot-end-marker
+!
+!
+logging discriminator EXCESS severity drops 6 msg-body drops EXCESSCOLL 
+logging buffered 8192
+logging console discriminator EXCESS
+enable secret 4 tnhtc92DXBhelxjYk8LWJrPV36S2i4ntXrpb4RFmfqY
+!
+username netadmin secret 4 tnhtc92DXBhelxjYk8LWJrPV36S2i4ntXrpb4RFmfqY
+no aaa new-model
+clock timezone EET 2 0
+clock summer-time EET recurring last Sun Mar 3:00 last Sun Oct 4:00
+no ipv6 cef
+ipv6 multicast rpf use-bgp
+vtp mode transparent
+no ip routing
+no ip icmp rate-limit unreachable
+!
+no ip domain-lookup
+no ip cef
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+spanning-tree vlan 1-4094 priority 8192
+!
+!
+!
+!
+vlan internal allocation policy ascending
+!
+vlan 201
+ name ISP1
+!
+vlan 202
+ name ISP2
+!
+ip tcp synwait-time 5
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ description ### To fw-br2-2 ###
+ switchport access vlan 201
+ switchport mode access
+ duplex auto
+ spanning-tree portfast
+!
+interface Ethernet0/1
+ description ### To ISP2 ###
+ switchport access vlan 201
+ switchport mode access
+ duplex auto
+ spanning-tree portfast
+!
+interface Ethernet0/2
+ shutdown
+ duplex auto
+!
+interface Ethernet0/3
+ shutdown
+ duplex auto
+!
+interface Ethernet1/0
+ description ### To fw-br2-2 ###
+ switchport access vlan 202
+ switchport mode access
+ duplex auto
+ spanning-tree portfast
+!
+interface Ethernet1/1
+ shutdown
+ duplex auto
+!
+interface Ethernet1/2
+ shutdown
+ duplex auto
+!
+interface Ethernet1/3
+ description ### To sw-br2-ext-1 ###
+ switchport trunk encapsulation dot1q
+ switchport trunk allowed vlan 201,202
+ switchport mode trunk
+ duplex auto
+!
+interface Vlan1
+ no ip address
+ no ip route-cache
+ shutdown
+!
+!
+no ip http server
+!
+!
+!
+!
+!
+control-plane
+!
+banner motd ^
+*************************************************************************
+* This system is for the use of authorized personel only.               *
+* Individuals using this computer system without authority, or in       *
+* excess of their authority, are subject to having all of their         *
+* activities on this system monitored and recorded by system            *
+* personnel.                                                            *
+*************************************************************************
+                             $(hostname)
+*************************************************************************
+^
+!
+line con 0
+ exec-timeout 0 0
+ logging synchronous
+ login local
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line vty 0 4
+ login
+ transport input none
+ transport output none
+!
+end
