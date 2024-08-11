@@ -1,0 +1,18 @@
+dn: cn=config
+changetype: modify
+replace: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: /etc/openldap/keys/ldap.corp.lab.key.pem
+ldap:/etc/openldap# cat tlsconf.ldif 
+dn: cn=config
+changetype: modify
+add: olcTLSCertificateFile
+olcTLSCertificateFile: /etc/ssl/certs/ldap.corp.lab.cert.pem
+-
+add: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: /etc/ssl/private/ldap.corp.lab.key.pem
+-
+add: olcTLSCACertificateFile
+olcTLSCACertificateFile: /etc/ssl/certs/intermediate.cert.pem
+-
+add: olcTLSCACertificatePath
+olcTLSCACertificatePath: /etc/ssl/certs

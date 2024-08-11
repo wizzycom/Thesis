@@ -1,0 +1,26 @@
+# corp.lab
+dn: dc=corp,dc=lab
+dc: corp
+o: Corp Organization
+objectClass: dcObject
+objectClass: organization
+
+# Manager, corp.lab
+dn: cn=Manager,dc=corp,dc=lab
+cn: Manager
+description: LDAP administrator
+objectClass: organizationalRole
+objectClass: top
+roleOccupant: dc=corp,dc=lab
+
+# People, corp.lab
+dn: ou=people,dc=corp,dc=lab
+ou: people
+objectClass: top
+objectClass: organizationalUnit
+
+# Groups, corp.lab
+dn: ou=group,dc=corp,dc=lab
+ou: group
+objectClass: top
+objectClass: organizationalUnit
