@@ -1,0 +1,193 @@
+no service pad
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec
+service timestamps log datetime msec
+service password-encryption
+service compress-config
+!
+hostname rt-hq-border-2
+!
+boot-start-marker
+boot-end-marker
+!
+aqm-register-fnf
+!
+enable secret 4 tnhtc92DXBhelxjYk8LWJrPV36S2i4ntXrpb4RFmfqY
+!
+no aaa new-model
+clock timezone EST -5 0
+mmi polling-interval 60
+no mmi auto-configure
+no mmi pvc
+mmi snmp-timeout 180
+no ip icmp rate-limit unreachable
+!
+!
+!
+!
+!
+!
+
+
+!
+!
+!
+!
+no ip domain lookup
+no ip cef
+no ipv6 cef
+!
+multilink bundle-name authenticated
+!
+!
+!
+!
+!
+!
+!
+!
+username netadmin privilege 15 secret 4 tnhtc92DXBhelxjYk8LWJrPV36S2i4ntXrpb4RFmfqY
+!
+redundancy
+!
+no cdp log mismatch duplex
+!
+track 2 ip sla 2 reachability
+ delay down 5 up 20
+!
+ip tcp synwait-time 5
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Ethernet0/0
+ ip address 193.92.0.2 255.255.255.248
+!
+interface Ethernet0/1
+ description ### To sw-hq-ext-2 ###
+ ip address 122.0.255.254 255.255.255.248
+ standby 0 ip 122.0.255.249
+ standby 0 preempt
+!
+interface Ethernet0/2
+ description ### iBGP to rt-hq-border-1 ###
+ ip address 122.0.255.246 255.255.255.252
+!
+interface Ethernet0/3
+ no ip address
+ shutdown
+!
+interface Ethernet1/0
+ no ip address
+ shutdown
+!
+interface Ethernet1/1
+ no ip address
+ shutdown
+!
+interface Ethernet1/2
+ no ip address
+ shutdown
+!
+interface Ethernet1/3
+ no ip address
+ shutdown
+!
+router bgp 65000
+ bgp log-neighbor-changes
+ timers bgp 5 15
+ neighbor 122.0.255.245 remote-as 65000
+ neighbor 193.92.0.1 remote-as 65502
+ !
+ address-family ipv4
+  network 122.0.0.0 mask 255.255.0.0
+  neighbor 122.0.255.245 activate
+  neighbor 122.0.255.245 next-hop-self
+  neighbor 122.0.255.245 soft-reconfiguration inbound
+  neighbor 193.92.0.1 activate
+  neighbor 193.92.0.1 soft-reconfiguration inbound
+  neighbor 193.92.0.1 route-map ISP_IN in
+  neighbor 193.92.0.1 route-map ISP_OUT out
+ exit-address-family
+!
+ip forward-protocol nd
+!
+ip as-path access-list 1 permit ^65502$
+!
+no ip http server
+no ip http secure-server
+ip route 122.0.0.0 255.255.0.0 122.0.255.250 track 2
+!
+ip access-list extended NET
+ permit ip 122.0.0.0 0.0.255.255 any
+!
+!
+ip prefix-list FROM_ISP seq 5 permit 193.92.0.0/16 ge 24
+ip prefix-list FROM_ISP seq 15 permit 0.0.0.0/0
+ip sla auto discovery
+ip sla 2
+ icmp-echo 122.0.255.250
+ threshold 2000
+ timeout 2000
+ frequency 2
+ip sla schedule 2 life forever start-time now
+!
+route-map ISP_IN permit 10
+ match ip address prefix-list FROM_ISP
+ set local-preference 200
+!
+route-map AS_PATH_ISP permit 10
+ match as-path 1
+!
+route-map ISP_OUT permit 10
+ match ip address NET
+ set as-path prepend 65000 65000 65000
+!
+!
+!
+control-plane
+!
+!
+!
+!
+!
+!
+!
+banner motd ^
+*************************************************************************
+* This system is for the use of authorized personel only.               *
+* Individuals using this computer system without authority, or in       *
+* excess of their authority, are subject to having all of their         *
+* activities on this system monitored and recorded by system            *
+* personnel.                                                            *
+*************************************************************************
+                             $(hostname)
+*************************************************************************
+^
+!
+line con 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+ login local
+line aux 0
+ exec-timeout 0 0
+ privilege level 15
+ logging synchronous
+line vty 0 4
+ login
+ transport input none
+ transport output none
+!
+!
+end
