@@ -1,0 +1,17 @@
+$TTL    604800
+@       IN      SOA     dns.corp.lab. root.corp.lab. (
+                     2024071406         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+
+
+@       IN      NS      dns.corp.lab.
+dns     IN      A       10.1.10.40
+
+ldap    IN      A       10.1.10.10
+int-ca  IN      A       10.1.10.70
+ca      IN      A       10.1.10.80
+radius  IN      A       10.1.10.100
+ldapadm IN      A       10.1.50.254

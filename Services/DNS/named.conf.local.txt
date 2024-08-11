@@ -1,0 +1,7 @@
+zone "corp.lab" {
+        type master;
+        file "/etc/bind/zones/db.corp.lab";
+};
+
+
+include "/etc/bind/zones.rfc1918";
